@@ -1,7 +1,7 @@
 const fs = require('fs');
 const os = require('os');
 const ps = require('ps4js');
-const asar = require('asar');
+const asar = require('@electron/asar');
 const path = require('path');
 
 const io = require('./io');
@@ -15,7 +15,7 @@ async function start() {
     try {
         argumentsHandler();
         await killBlitz();
-        
+
         // mac os app path
         if (process.platform === 'darwin') {
             var dir = os.homedir() + '/Applications/Blitz.app/Contents/Resources';
@@ -37,7 +37,7 @@ async function start() {
         else {
             console.log('Extracting app.asar...');
             asar.extractAll(`${appPath}/app.asar`, `${appPath}/app/`);
-        
+
             console.log('Downloading ad & tracking filters...');
             await io.downloadFile('https://easylist.to/easylist/easylist.txt', `${appPath}/app/src/easylist.txt`);
             await io.downloadFile('https://easylist.to/easylist/easyprivacy.txt', `${appPath}/app/src/easyprivacy.txt`);
@@ -53,7 +53,7 @@ async function start() {
             else io.copyFile('./build/adblocker.umd.min.js', `${appPath}/app/src/adblocker.umd.min.js`)
     
             // start writing our payload to createWindow.js
-            io.modifyFileAfterContext(js.filterEngine, `${appPath}/app/src/electronWindowHandlers.js`, 'function interceptRequests() {');
+            io.modifyFileAtContext(js.filterEngine, `${appPath}/app/src/electronWindowHandlers.js`, 'function interceptRequests(window) {');
             io.modifyFileAfterContext('session: true,', `${appPath}/app/src/createWindow.js`, 'webPreferences: {');
     
             // optional features
