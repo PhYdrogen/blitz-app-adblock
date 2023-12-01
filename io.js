@@ -39,6 +39,45 @@ async function downloadFile(url, filePath) {
     });
 }
 
+function modifyFileAtContext  (data, filePath, context) {
+    const file = fs.readFileSync(filePath).toString().split('\n')
+
+    let line = -1
+    let del = 0;
+
+    for (let i = 0; i < file.length; i++) {
+      const lineString = file[i]
+  
+      if (context.trim() === lineString.trim()) {
+        line = i
+        break
+      }
+    }
+  
+    if (line === -1) {
+      throw new Error('Current Blitz version doesn\'t contain the given injection context.')
+    }
+  
+    if (file[line] !== data) {
+      for (let j = line; j < file.length; j++) {
+          console.log(file[j]);
+
+          if (file[j].trim() == ");") { //file.indexOf(");")
+            console.log("TROUVER");
+            del = j - line + 1;
+            break
+          }
+      }
+      console.log(del);
+      file.splice(line, del, data);
+  
+      const text = file.join('\n')
+      fs.writeFileSync(filePath, text)
+      console.log(`${filePath} => Writing to line ${line + 2}: ${data}`)
+    }
+}
+
+
 function modifyFileAfterContext (data, filePath, context) {
   const file = fs.readFileSync(filePath).toString().split('\n')
 
@@ -108,6 +147,7 @@ function deleteFolder(dir_path) {
 
 module.exports = {
     downloadFile: downloadFile,
+    modifyFileAtContext: modifyFileAtContext,
     modifyFileAfterContext: modifyFileAfterContext,
     modifyFileAtLine: modifyFileAtLine,
     copyFile: copyFile,
